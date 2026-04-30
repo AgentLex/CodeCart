@@ -59,6 +59,21 @@ If you are an API developer, inject this into your **System Prompt**:
 
 ---
 
+## 🌍 Portable & Offline Version / 离线便携版
+
+CodeCart is designed with a **Zero-Dependency** architecture. You don't need a server or internet to use it.
+CodeCart 采用**零依赖**架构设计，您无需服务器或互联网即可使用。
+
+### How to use offline / 如何离线使用：
+1. **Download**: Get the `index.html` from this repo or download the standalone file from the [Releases](https://github.com/AgentLex/CodeCart/releases) page.
+2. **下载**：从本仓库下载 `index.html`，或从 [Releases](https://github.com/AgentLex/CodeCart/releases) 页面下载独立文件。
+3. **Run**: Double-click the file to open it in any modern browser. It works via `file:///` protocol.
+4. **运行**：双击文件即可在任何现代浏览器中开启，支持本地协议运行。
+5. **Security**: 100% Client-side. Your cognitive data never leaves your computer.
+6. **安全**：100% 客户端运行，您的认知数据绝不会离开您的电脑。
+
+---
+
 ## 🛠 指令集参考 / DSL Syntax Reference
 
 | Command 指令 | Effect 作用 | Example 示例 |
