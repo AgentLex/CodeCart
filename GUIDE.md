@@ -107,5 +107,6 @@ Want AI-B to review AI-A's logic?
 
 ## 6. Support the Lab / 捐赠与支持
 - **Developed by LexXu in Shanghai. 由上海的 Lexxu 研发。**
-- **Ko-fi: [lexxu](https://ko-fi.com/lexxu)  Crypto (ETH/ENS): 0xF729Db34e9733d74c992a27AA812cFF5363C82e0**
+- **Ko-fi: [lexxu](https://ko-fi.com/lexxu)**
+- **Crypto (ETH/ENS): 0xF729Db34e9733d74c992a27AA812cFF5363C82e0**
 
