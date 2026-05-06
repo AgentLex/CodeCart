@@ -1,6 +1,6 @@
 # 🗂️ CodeCart：AI 认知记忆卡带 (v1.3)
 
-[English](README.md) | **简体中文**
+[English](README.md) | **简体中文** | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md)
 
 **停止 AI 记忆污染，结晶逻辑，节省 Token。**
 
