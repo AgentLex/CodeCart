@@ -3,260 +3,592 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeCart v1.1.8 - True Bilingual & Robust</title>
+    <title>CodeCart - 思卡</title>
+    
     <style>
         :root {
             --bg-app: #f4f4f5; --bg-card: #ffffff; --bg-sidebar: #fafafa;
-            --accent: #2563eb; --accent-dim: #dbeafe; --border: #e4e4e7;
+            --accent: #6366F1; --accent-dim: #e0e7ff; --border: #e4e4e7;
             --text-primary: #18181b; --text-secondary: #71717a; --danger: #dc2626;
+            --service-bg: #f8f7ff; --service-border: #c7d2fe;
+            --btn-sec-bg: #e4e4e7; --btn-sec-fg: #52525b;
         }
         body.dark-mode {
             --bg-app: #09090b; --bg-card: #18181b; --bg-sidebar: #09090b;
-            --accent: #3b82f6; --accent-dim: #1d4ed833; --border: #27272a;
+            --accent: #818CF8; --accent-dim: #1e1b4b55; --border: #27272a;
             --text-primary: #fafafa; --text-secondary: #a1a1aa; --danger: #ef4444;
+            --service-bg: #1e1b4b33; --service-border: #3730a3;
+            --btn-sec-bg: #27272a; --btn-sec-fg: #a1a1aa;
         }
-        * { box-sizing: border-box; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: "Inter", -apple-system, sans-serif; background: var(--bg-app); color: var(--text-primary); overflow: hidden; transition: 0.3s; }
+        body.hc-mode {
+            --bg-app: #000000; --bg-card: #0a0a0a; --bg-sidebar: #000000;
+            --accent: #FFD700; --accent-dim: #3a3000; --border: #FFD700;
+            --text-primary: #FFFFFF; --text-secondary: #FFD700; --danger: #FF4444;
+            --service-bg: #1a1400; --service-border: #FFD700;
+            --btn-sec-bg: #000000; --btn-sec-fg: #FFD700;
+        }
 
-        header { height: 52px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--bg-sidebar); z-index: 100; }
-        .token-stat { font-family: "JetBrains Mono", monospace; color: var(--accent); font-weight: 700; font-size: 13px; }
-        
-        .layout { display: flex; height: calc(100% - 252px); }
-        aside { width: 280px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--bg-sidebar); }
-        .side-tool { margin: 15px; padding: 16px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes squish {
+            0%,100% { transform: translateY(0px) scaleY(1); animation-timing-function: cubic-bezier(.34,1.56,.64,1); }
+            45%     { transform: translateY(5px) scaleY(0.85); animation-timing-function: cubic-bezier(.64,0,.36,1); }
+        }
+        .wL { transform-origin: 36px 40px; animation: spin 2s linear infinite; }
+        .wR { transform-origin: 83px 40px; animation: spin 2s linear infinite; }
+        .cart-auto { animation: squish 2.4s ease-in-out infinite; transform-origin: 50px 40px; }
+        .logo-svg { width: 100%; height: auto; display: block; }
+        .logo-wrap { width: 220px; flex-shrink: 0; }
+
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; height: 100vh; font-family: "Inter", -apple-system, sans-serif; background: var(--bg-app); color: var(--text-primary); overflow: hidden; transition: background 0.3s, color 0.3s; display: flex; flex-direction: column; }
+
+        [data-tip] { position: relative; }
+        [data-tip]:hover::after {
+            content: attr(data-tip);
+            position: absolute; left: 50%; transform: translateX(-50%);
+            background: #1e1e1e; color: #fff; font-size: 11px; font-weight: 500;
+            padding: 5px 10px; border-radius: 6px; white-space: nowrap; z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none;
+        }
+        header [data-tip]:hover::after { top: calc(100% + 8px); }
+        aside [data-tip]:hover::after, footer [data-tip]:hover::after { bottom: calc(100% + 8px); }
+        body.hc-mode [data-tip]:hover::after { background: #FFD700; color: #000; border: 1px solid #000; }
+
+        header { height: 52px; flex-shrink: 0; padding: 0 16px 0 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--bg-sidebar); z-index: 100; gap: 8px; }
+        .header-left { display: flex; align-items: center; min-width: 0; }
+        .header-right { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+        .token-stat { font-family: "JetBrains Mono", monospace; color: var(--accent); font-weight: 700; font-size: 12px; white-space: nowrap; }
+
+        .lang-wrap { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+        .lang-select { padding: 5px 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--btn-sec-bg); color: var(--btn-sec-fg); font-size: 11px; font-weight: 600; cursor: pointer; outline: none; }
+        body.hc-mode .lang-select { border: 1px solid #FFD700; }
+
+        .layout { flex: 1; display: flex; min-height: 0; overflow: hidden; }
+        aside { width: 280px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--bg-sidebar); overflow-y: auto; }
+        .side-tool { margin: 12px 12px 0; padding: 14px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); }
+        .side-service { margin: 10px 12px 0; padding: 12px 14px; background: var(--service-bg); border-radius: 10px; border: 1px solid var(--service-border); }
 
         main { flex: 1; overflow-y: auto; padding: 32px; }
         #canvas { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; align-content: start; }
-        .empty-state { grid-column: 1 / -1; min-height: 320px; display:flex; align-items:center; justify-content:center; }
-        .empty-card { max-width: 460px; text-align:center; background: var(--bg-card); border:1px dashed var(--border); border-radius: 16px; padding: 36px 24px; }
-        .empty-icon { font-size: 42px; margin-bottom: 12px; }
-        .empty-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-        .empty-desc { font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
 
-        .node { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; position: relative; transition: 0.3s; border-top: 1px solid var(--border); }
+        .node { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; position: relative; transition: 0.3s; }
         .node:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 24px -12px rgba(0,0,0,0.2); }
         .node.anchor { border-top: 4px solid var(--accent); }
         .node.superseded { opacity: 0.2; filter: grayscale(1); }
         .node-id { font-family: "JetBrains Mono"; font-size: 11px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; display: block; font-weight: bold; }
-        
-        .del-btn { position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; color: var(--text-secondary); opacity: 0; }
+        .node-content { font-size: 13px; line-height: 1.6; word-break: break-word; }
+        .del-btn { position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; color: var(--text-secondary); opacity: 0; font-size: 16px; }
         .node:hover .del-btn { opacity: 1; }
         .del-btn:hover { background: var(--danger); color: #fff; }
+        body.hc-mode .node { border-width: 2px; }
 
-        footer { height: 200px; background: var(--bg-card); border-top: 1px solid var(--border); display: flex; flex-direction: column; padding: 12px; gap: 8px; }
-        .console-container { flex: 1; display: flex; gap: 12px; }
-        textarea { flex: 1; background: var(--bg-app); border: 1px solid var(--border); border-radius: 12px; padding: 16px; color: var(--text-primary); font-family: "JetBrains Mono", monospace; font-size: 13px; outline: none; }
+        footer { min-height: 180px; flex-shrink: 0; background: var(--bg-card); border-top: 1px solid var(--border); display: flex; flex-direction: column; padding: 12px; gap: 8px; }
+        .input-tabs { display: flex; gap: 4px; }
+        .tab-btn { padding: 4px 12px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-size: 11px; font-weight: 600; cursor: pointer; }
+        .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+        body.hc-mode .tab-btn.active { background: #FFD700; color: #000; }
+
+        #easy-panel { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .easy-row { display: flex; align-items: center; gap: 8px; }
+        .easy-label { font-size: 11px; color: var(--text-secondary); min-width: 80px; text-align: right; }
+        .easy-input { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-primary); font-size: 13px; outline: none; }
+        .easy-select { padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-primary); font-size: 12px; }
+
+        #adv-panel { display: none; flex-direction: column; gap: 6px; flex: 1; }
+        .console-container { flex: 1; display: flex; gap: 12px; min-height: 100px; }
+        textarea { flex: 1; height: 100%; background: var(--bg-app); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: var(--text-primary); font-family: "JetBrains Mono", monospace; font-size: 13px; outline: none; resize: none; }
+        .console-actions { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; justify-content: flex-start; }
 
         button { padding: 10px 16px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .btn-primary { background: var(--accent); color: #fff; }
-        .btn-secondary { background: var(--border); color: var(--text-secondary); }
+        .btn-secondary { background: var(--btn-sec-bg); color: var(--btn-sec-fg); }
+        body.hc-mode .btn-secondary { border: 1px solid #FFD700; }
+        body.hc-mode .btn-primary { background: #FFD700; color: #000; }
 
-        #modal-overlay, #guide-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-card { background: var(--bg-card); padding: 32px; border-radius: 20px; width: 420px; border: 1px solid var(--border); text-align: left; }
+        #modal-overlay, #feedback-overlay, #guide-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-card { background: var(--bg-card); padding: 32px; border-radius: 20px; width: 460px; max-width: 90vw; border: 1px solid var(--border); }
+        
+        .fb-wa { display: flex; gap: 16px; align-items: center; padding: 16px; background: var(--service-bg); border-radius: 12px; border: 1px solid var(--service-border); margin-bottom: 16px; }
+        .fb-wa-qr { width: 100px; height: 100px; background: #fff; padding: 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .fb-wa-info { flex: 1; }
+        .fb-wa-desc { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.4; }
+        .fb-wa-btn { background: #25D366; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; border: none; }
+
+        .fb-section { margin-bottom: 12px; }
+        .fb-section label { display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; }
+        .fb-section input, .fb-section textarea { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-primary); outline: none; }
+
+        #toast { position: fixed; bottom: 220px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg-card); border: 1px solid var(--service-border); color: var(--text-primary); font-size: 12px; padding: 10px 18px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.18); opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 2000; }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body class="dark-mode">
 
 <header>
-    <div><strong id="ui-title">CODECART v1.1.8</strong></div>
-    <div style="display:flex; gap:12px; align-items:center;">
-        <div class="token-stat" id="token-display">TOKEN 已节约: 0</div>
-        <button class="btn-secondary" onclick="store.toggleLang()" id="btn-lang">EN/ZH</button>
-        <button class="btn-secondary" onclick="store.toggleTheme()" id="btn-theme">🌓 THEME</button>
-        <button class="btn-primary" style="background:#f59e0b;" onclick="store.startGuide()" id="btn-guide-start">🐣 小白指引</button>
-        <button class="btn-secondary" onclick="store.toggleHelp()">?</button>
+    <div class="header-left">
+        <div class="logo-wrap" id="logo-container"></div>
+    </div>
+    <div class="header-right">
+        <div class="token-stat" id="token-display">Tokens Saved ~0</div>
+        <div class="lang-wrap">
+            <span>🌐</span>
+            <span id="lbl-lang" style="margin-right: 2px;"></span>
+            <select class="lang-select" id="lang-select" onchange="store.setLang(this.value)">
+                <option value="zh-CN">🇨🇳 简体中文</option>
+                <option value="zh-TW">🇹🇼 繁体中文</option>
+                <option value="en">🇺🇸 English</option>
+                <option value="ja">🇯🇵 日本語</option>
+                <option value="es">🇪🇸 Español</option>
+                <option value="pt">🇧🇷 Português</option>
+                <option value="de">🇩🇪 Deutsch</option>
+                <option value="id">🇮🇩 Bahasa Indonesia</option>
+                <option value="th">🇹🇭 ไทย</option>
+                <option value="vi">🇻🇳 Tiếng Việt</option>
+            </select>
+        </div>
+        <button class="btn-secondary" id="btn-theme" onclick="store.toggleTheme()">🌙</button>
+        <button class="btn-secondary" id="btn-share" onclick="store.shareURL()">🔗</button>
+        <button class="btn-primary" id="btn-guide" onclick="store.startGuide()" style="background:#f59e0b;">🐣</button>
+        <button class="btn-secondary" id="btn-help" onclick="store.toggleHelp()">?</button>
+        <button class="btn-secondary" id="btn-fb" onclick="store.toggleFeedback()">💬</button>
     </div>
 </header>
 
 <div class="layout">
     <aside>
         <div class="side-tool">
-            <small id="ui-helper-title" style="color:var(--accent); font-weight:bold;">AI 调教助手</small>
-            <p id="ui-helper-desc" style="font-size:10px; color:var(--text-secondary); margin:8px 0;">生成一段话发给 AI，让它直接输出 CodeCart 格式。</p>
-            <button class="btn-secondary" id="btn-copy-prompt" style="width:100%; font-size:10px;" onclick="store.copyAIPrompt()">复制调教语</button>
+            <small id="ui-helper-title" style="color:var(--accent); font-weight:bold;"></small>
+            <p id="ui-helper-desc" style="font-size:10px; color:var(--text-secondary); margin:8px 0;"></p>
+            <button class="btn-secondary" id="btn-copy-prompt" style="width:100%; font-size:10px;" onclick="store.copyAIPrompt()"></button>
         </div>
-        <div id="entity-index" style="flex:1; overflow-y:auto; padding:12px;"></div>
-        <div style="padding: 20px;">
-            <button class="btn-primary" onclick="store.copyContext()" style="width: 100%;" id="btn-copy-ctx">📋 复制上下文</button>
+        <div class="side-service">
+            <div class="side-service-title" id="ui-svc-title"></div>
+            <p class="side-service-desc" id="ui-svc-desc"></p>
+            <button class="side-service-btn" id="btn-svc" onclick="window.location.href='#service'"></button>
+        </div>
+        <div id="entity-index" style="flex:1; overflow-y:auto; padding:10px;"></div>
+        <div style="padding: 12px;">
+            <button class="btn-primary" id="btn-copy-ctx" style="width: 100%;" onclick="store.copyContext()"></button>
         </div>
     </aside>
     <main><div id="canvas"></div></main>
 </div>
 
 <footer>
-    <div style="display:flex; gap:8px; align-items:center;">
-        <button class="btn-secondary" onclick="store.insertCmd('+CLAIM(ID, \'\')')" id="btn-add-claim">+结论</button>
-        <button class="btn-secondary" onclick="store.insertCmd('>SUPERSEDE(OLD, NEW, \'\')')" id="btn-add-supersede">>替代</button>
-        <button class="btn-secondary" onclick="store.insertCmd('+ANCHOR(\'\')')" id="btn-add-anchor">+锚点</button>
-        <small id="ui-id-tip" style="font-size:10px; color:var(--text-secondary); margin-left:10px;">建议 ID: phy_ (物理), hw_ (硬件)</small>
+    <div class="input-tabs">
+        <button class="tab-btn active" id="tab-easy" onclick="store.switchTab('easy')"></button>
+        <button class="tab-btn" id="tab-adv" onclick="store.switchTab('adv')"></button>
     </div>
-    <div class="console-container">
-        <textarea id="console-input" placeholder="贴入 DSL 指令或 AI 原始对话文本..."></textarea>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-            <button class="btn-primary" onclick="store.execute()" id="btn-exec">⚡ 执行指令</button>
-            <button class="btn-secondary" style="color:#f472b6;" onclick="store.smartCollapse()" id="btn-smart">🧠 智能坍缩</button>
-            <button class="btn-secondary" onclick="store.exportJSON()" id="btn-save">SAVE</button>
+    
+    <div id="easy-panel">
+        <div class="easy-row">
+            <span class="easy-label" id="easy-lbl-content"></span>
+            <input type="text" class="easy-input" id="easy-input-content" />
+        </div>
+        <div class="easy-row">
+            <span class="easy-label" id="easy-lbl-id"></span>
+            <input type="text" class="easy-input" id="easy-input-id" style="max-width:140px;" />
+            <span class="easy-label" id="easy-lbl-type"></span>
+            <select class="easy-select" id="easy-input-type">
+                <option value="claim" id="opt-claim"></option>
+                <option value="anchor" id="opt-anchor"></option>
+            </select>
+            <button class="btn-primary" id="btn-easy-add" onclick="store.easyAdd()"></button>
+        </div>
+    </div>
+
+    <div id="adv-panel">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:4px;">
+            <button class="btn-secondary" id="btn-add-claim" onclick="store.insertCmd('+CLAIM(ID, \'\')')"></button>
+            <button class="btn-secondary" id="btn-add-supersede" onclick="store.insertCmd('>SUPERSEDE(OLD, NEW, \'\')')"></button>
+            <button class="btn-secondary" id="btn-add-anchor" onclick="store.insertCmd('+ANCHOR(\'\')')"></button>
+        </div>
+        <div class="console-container">
+            <textarea id="console-input"></textarea>
+            <div class="console-actions">
+                <button class="btn-primary" id="btn-exec" onclick="store.execute()"></button>
+                <button class="btn-secondary" id="btn-smart" onclick="store.smartCollapse()" style="color:#f472b6;"></button>
+                <button class="btn-secondary" id="btn-save" onclick="store.exportJSON()">JSON</button>
+            </div>
         </div>
     </div>
 </footer>
 
-<!-- Help Modal -->
-<div id="modal-overlay">
+<div id="toast"></div>
+
+<div id="modal-overlay" onclick="event.target===this&&store.toggleHelp()">
     <div class="modal-card">
-        <h3 id="ui-help-title">指令速查表</h3>
-        <div id="ui-help-content" style="font-size:12px; line-height:1.8;"></div>
-        <button class="btn-primary" onclick="store.toggleHelp()" id="btn-help-close" style="width:100%; margin-top:20px;">关闭</button>
+        <h3 id="help-title"></h3>
+        <div id="help-content" style="font-size:12px; line-height:1.8;"></div>
+        <button class="btn-primary" id="btn-help-close" onclick="store.toggleHelp()" style="width:100%; margin-top:20px;"></button>
     </div>
 </div>
 
-<!-- Step Guide -->
-<div id="guide-overlay" onclick="store.nextStep()">
-    <div class="modal-card" style="width:500px;">
-        <div id="step-1" class="guide-step" style="display:none;">
-            <h4 id="ui-g1-t">第一步：设置锚点</h4>
-            <p id="ui-g1-d">点击下方的 +锚点，输入项目的底线（如：必须手持）。</p>
-            <small style="color:var(--accent);">CLICK TO NEXT...</small>
+<div id="guide-overlay" onclick="event.target===this&&(this.style.display='none')">
+    <div class="modal-card">
+        <h3 id="guide-title"></h3>
+        <div id="guide-content" style="font-size:13px; line-height:1.8; white-space: pre-wrap; color: var(--text-secondary); margin-bottom: 20px;"></div>
+        <button class="btn-primary" id="btn-guide-close" onclick="document.getElementById('guide-overlay').style.display='none'" style="width:100%;"></button>
+    </div>
+</div>
+
+<div id="feedback-overlay" onclick="event.target===this&&store.toggleFeedback()">
+    <div class="modal-card">
+        <h3 id="fb-title" style="margin-top:0;"></h3>
+        <div class="fb-wa">
+            <div class="fb-wa-qr">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://wa.me/640204842024" alt="WhatsApp QR" style="width: 100%; height: 100%; display: block; border-radius: 4px; object-fit: contain;">
+            </div>
+            <div class="fb-wa-info">
+                <div class="fb-wa-desc" id="fb-wa-desc"></div>
+                <button class="fb-wa-btn" id="btn-wa-open" onclick="store.openWA()"></button>
+            </div>
         </div>
-        <div id="step-2" class="guide-step" style="display:none;">
-            <h4 id="ui-g2-t">第二步：同步背景</h4>
-            <p id="ui-g2-d">点击左侧蓝色的 复制上下文。这会让 AI 明白当前的逻辑进展。</p>
+        <div style="text-align:center; font-size:11px; color:var(--text-secondary); margin:10px 0;">— OR EMAIL —</div>
+        <div class="fb-section">
+            <label id="fb-lbl-email"></label>
+            <input type="email" id="fb-email" placeholder="you@example.com" />
         </div>
-        <div id="step-3" class="guide-step" style="display:none;">
-            <h4 id="ui-g3-t">第三步：固化结论</h4>
-            <p id="ui-g3-d">执行 AI 给出的 DSL，或使用智能坍缩来记录长对话。</p>
+        <div class="fb-section">
+            <label id="fb-lbl-msg"></label>
+            <textarea id="fb-msg" style="height:60px;"></textarea>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <button class="btn-primary" id="btn-fb-send" style="flex:1;" onclick="store.sendFeedback()"></button>
+            <button class="btn-secondary" id="btn-fb-close" style="flex:1;" onclick="store.toggleFeedback()"></button>
         </div>
     </div>
 </div>
 
 <script>
-    const i18n = {
-        zh: {
-            title: "CODECART v1.1.8", token: "Token 约节约: ~", lang: "EN/ZH", theme: "🌓 模式",
-            guideStart: "🐣 小白指引", helperTitle: "AI 调教助手", helperDesc: "生成对话发给 AI，使其输出格式化指令。",
-            copyPrompt: "复制调教语", copyCtx: "📋 复制上下文", claim: "+结论", supersede: ">替代", anchor: "+锚点",
-            idTip: "建议 ID: phy_ (物理), hw_ (硬件), mkt_ (市场)", placeholder: "贴入 DSL 指令或 AI 原始对话文本...",
-            exec: "⚡ 执行指令", smart: "🧠 智能坍缩", helpTitle: "指令速查表", helpClose: "关闭",
-            helpText: "<b>+CLAIM(id, '内容')</b>: 记录事实结论。<br><b>>SUPERSEDE(旧, 新, '理由')</b>: 逻辑演化替代。<br><b>+ANCHOR('内容')</b>: 全局硬约束。<br><br>💡 核心技巧：让 AI 替你写指令并粘贴回来。",
-            g1t: "第一步：设置锚点", g1d: "点击底部的 +锚点，先写下不可妥协的约束条件。",
-            g2t: "第二步：同步背景", g2d: "点击左侧『复制上下文』，把当前有效逻辑同步给 AI。",
-            g3t: "第三步：固化结论", g3d: "把 AI 输出的 DSL 粘回来执行，或直接用智能坍缩记录长文本。",
-            prompt: "请作为我的研究助理。在我接下来的提问中，请在给出分析后，务必将核心结论总结为 CodeCart DSL 格式：+CLAIM(id, '内容')。如果涉及逻辑更新，请使用 >SUPERSEDE(旧id, 新id, '理由')。",
-            copied: "已复制到剪贴板！", alertId: "请输入一个 ID (如 phy_01):", emptyTitle: "卡带还是空的", emptyDesc: "点击『🐣 小白指引』开始，或把 AI 对话粘贴到底部输入框后点击『🧠 智能坍缩』。"
-        },
-        en: {
-            title: "CODECART v1.1.8", token: "Estimated tokens saved: ~", lang: "EN/ZH", theme: "🌓 THEME",
-            guideStart: "🐣 GUIDE", helperTitle: "PROMPT HELPER", helperDesc: "Guide AI to output structured CodeCart DSL.",
-            copyPrompt: "COPY PROMPT", copyCtx: "📋 SYNC CONTEXT", claim: "+CLAIM", supersede: ">SUPERSEDE", anchor: "+ANCHOR",
-            idTip: "ID Tip: phy_ (physics), hw_ (hardware)", placeholder: "Paste DSL or raw chat text here...",
-            exec: "⚡ EXECUTE", smart: "🧠 COLLAPSE", helpTitle: "Cheat Sheet", helpClose: "CLOSE",
-            helpText: "<b>+CLAIM(id, 'text')</b>: Add logic node.<br><b>>SUPERSEDE(old, new, 'why')</b>: Update logic flow.<br><b>+ANCHOR('text')</b>: Hard constraint.<br><br>💡 Tip: Ask AI to write DSL for you and paste it back.",
-            g1t: "Step 1: Set Anchors", g1d: "Click +ANCHOR at the bottom and write down your non-negotiable constraints first.",
-            g2t: "Step 2: Sync Context", g2d: "Click SYNC CONTEXT on the left to bring the AI up to your current working state.",
-            g3t: "Step 3: Commit Logic", g3d: "Paste back AI-generated DSL to execute, or use COLLAPSE to compress raw text into a node.",
-            prompt: "Act as my research assistant. In your future responses, please summarize the core findings into CodeCart DSL format: +CLAIM(id, 'content'). If updating a previous point, use >SUPERSEDE(old_id, new_id, 'reason').",
-            copied: "Copied to clipboard!", alertId: "Enter an ID (e.g., phy_01):", emptyTitle: "Your cartridge is still empty", emptyDesc: "Click '🐣 GUIDE' to start, or paste an AI conversation into the bottom input box and click '🧠 COLLAPSE'."
-        }
-    };
+const THEMES = ['dark-mode', 'light-mode', 'hc-mode'];
+const THEME_ICONS = { 'dark-mode': '🌙', 'light-mode': '☀️', 'hc-mode': '👁' };
 
-    class CodeCartV118 {
-        constructor() {
-            this.lang = 'zh'; this.data = { nodes: [], totalSaved: 0 };
-            this.currentStep = 0; this.init();
-        }
-        init() {
-            this.updateUI();
-            this.render();
-            if (!localStorage.getItem('cc_guided')) {
-                localStorage.setItem('cc_guided', '1');
-                setTimeout(() => this.startGuide(), 500);
-            }
-        }
-        toggleTheme() { document.body.classList.toggle('dark-mode'); }
-        toggleLang() { 
-            this.lang = this.lang === 'zh' ? 'en' : 'zh'; 
-            this.updateUI(); 
-        }
+const i18n = {
+    "zh-CN": {
+        tokensSaved: "已节约 Token ~", helpTitle: "指令速查", helpClose: "关闭",
+        helperTitle: "AI 调教助手", helperDesc: "引导 AI 按格式输出结论。",
+        copyPrompt: "复制调教语", copyCtx: "📋 同步上下文",
+        svcTitle: "AI 自动整理服务", svcDesc: "适合不想手动记录的用户。", svcBtn: "查看服务",
+        tabEasy: "✏️ 简易模式", tabAdv: "⚙️ 高级模式",
+        easyLblContent: "发现/结论：", easyLblId: "编号(选填)：", easyLblType: "类型：",
+        optClaim: "记录事实", optAnchor: "设定锚点", btnEasyAdd: "✚ 记录",
+        claim: "+结论", supersede: ">替代", anchor: "+锚点", exec: "⚡ 执行", smart: "🧠 坍缩",
+        ttTheme: "切换主题", ttShare: "分享链接", ttGuide: "新手引导", ttHelp: "查看速查表", ttFb: "反馈/联系",
+        ttPrompt: "复制指令发给 AI", ttCtx: "将当前节点同步给 AI",
+        fbTitle: "反馈 / 联系我们", fbWaDesc: "扫码通过 WhatsApp 与我们即时沟通", waOpen: "打开 WhatsApp",
+        fbLblEmail: "您的邮箱 (选填)", fbLblMsg: "反馈内容", fbSend: "发送邮件", fbClose: "取消",
+        copied: "已复制！", confirmDel: "确认删除该节点？", shareOk: "分享链接已复制！",
+        langLabel: "语言", guideTitle: "🚀 新手引导", guideClose: "开始使用",
+        guideSteps: "1. 简易模式：在下方直接输入发现的内容，点击记录。\n2. 高级模式：支持编写 DSL 语法进行复杂逻辑推导。\n3. 同步上下文：随时复制左侧的上下文，发给 AI 以维持长记忆。\n4. 数据存储：所有数据安全地保存在您的本地浏览器中。"
+    },
+    "zh-TW": {
+        tokensSaved: "已節約 Token ~", helpTitle: "指令速查", helpClose: "關閉",
+        helperTitle: "AI 調教助手", helperDesc: "引導 AI 按格式輸出結論。",
+        copyPrompt: "複製調教語", copyCtx: "📋 同步上下文",
+        svcTitle: "AI 自動整理服務", svcDesc: "適合不想手動記錄的用戶。", svcBtn: "查看服務",
+        tabEasy: "✏️ 簡易模式", tabAdv: "⚙️ 高級模式",
+        easyLblContent: "發現/結論：", easyLblId: "編號(選填)：", easyLblType: "類型：",
+        optClaim: "記錄事實", optAnchor: "設定錨點", btnEasyAdd: "✚ 記錄",
+        claim: "+結論", supersede: ">替代", anchor: "+錨點", exec: "⚡ 執行", smart: "🧠 坍縮",
+        ttTheme: "切換主題", ttShare: "分享連結", ttGuide: "新手引導", "ttHelp": "查看速查表", ttFb: "反饋/聯繫",
+        ttPrompt: "複製指令發給 AI", ttCtx: "將當前節點同步給 AI",
+        fbTitle: "反饋 / 聯繫我們", fbWaDesc: "掃碼通過 WhatsApp 與我們即時溝通", waOpen: "打開 WhatsApp",
+        fbLblEmail: "您的郵箱 (選填)", fbLblMsg: "反饋內容", fbSend: "發送郵件", fbClose: "取消",
+        copied: "已複製！", confirmDel: "確認刪除該節點？", shareOk: "分享連結已複製！",
+        langLabel: "語言", guideTitle: "🚀 新手引導", guideClose: "開始使用",
+        guideSteps: "1. 簡易模式：在下方直接輸入發現的內容，點擊記錄。\n2. 高級模式：支持編寫 DSL 語法進行複雜邏輯推導。\n3. 同步上下文：隨時複製左側的上下文，發給 AI 以維持長記憶。\n4. 數據存儲：所有數據安全地保存在您的本地瀏覽器中。"
+    },
+    en: {
+        tokensSaved: "Tokens Saved ~", helpTitle: "Cheat Sheet", helpClose: "Close",
+        helperTitle: "Prompt Helper", helperDesc: "Guide AI to output DSL format.",
+        copyPrompt: "Copy Prompt", copyCtx: "📋 Sync Context",
+        svcTitle: "AI Organizer Service", svcDesc: "For users who prefer automation.", svcBtn: "View Service",
+        tabEasy: "✏️ Easy Mode", tabAdv: "⚙️ Advanced",
+        easyLblContent: "I found:", easyLblId: "ID (optional):", easyLblType: "Type:",
+        optClaim: "Claim", optAnchor: "Anchor", btnEasyAdd: "✚ Save",
+        claim: "+CLAIM", supersede: ">SUPERSEDE", anchor: "+ANCHOR", exec: "⚡ EXECUTE", smart: "🧠 COLLAPSE",
+        ttTheme: "Change Theme", ttShare: "Share Link", ttGuide: "Start Guide", ttHelp: "View Help", ttFb: "Feedback",
+        ttPrompt: "Copy system prompt", ttCtx: "Sync nodes to AI",
+        fbTitle: "Feedback / Contact", fbWaDesc: "Scan to chat with us via WhatsApp", waOpen: "Open WhatsApp",
+        fbLblEmail: "Your Email", fbLblMsg: "Message", fbSend: "Send Email", fbClose: "Cancel",
+        copied: "Copied!", confirmDel: "Delete this node?", shareOk: "Link copied!",
+        langLabel: "Lang", guideTitle: "🚀 Welcome Guide", guideClose: "Get Started",
+        guideSteps: "1. Easy Mode: Type your findings below and click save.\n2. Adv Mode: Write DSL for complex logic.\n3. Sync Context: Copy context to AI to maintain long memory.\n4. Storage: Data is safely stored locally in your browser."
+    },
+    ja: {
+        tokensSaved: "節約トークン ~", helpTitle: "クイックヘルプ", helpClose: "閉じる",
+        helperTitle: "AIプロンプト", helperDesc: "AIをDSL形式に誘導します。",
+        tabEasy: "✏️ 簡易モード", tabAdv: "⚙️ 詳細モード",
+        easyLblContent: "結論内容：", easyLblId: "ID (任意)：", optClaim: "結論記録", btnEasyAdd: "✚ 保存",
+        fbTitle: "フィードバック", waOpen: "WhatsAppを開く", copied: "コピーしました！",
+        langLabel: "言語", guideTitle: "🚀 使い方ガイド", guideClose: "始める",
+        guideSteps: "1. 簡易モード：下の入力欄に発見を書いて保存します。\n2. 詳細モード：DSL構文で複雑な論理を記述します。\n3. 文脈同期：AIに記憶を維持させるために文脈をコピーして送信します。\n4. 保存：データはブラウザ内に安全に保存されます。"
+    },
+    es: { tokensSaved: "Tokens Ahorrados ~", tabEasy: "✏️ Modo Fácil", btnEasyAdd: "✚ Guardar", fbTitle: "Contacto", copied: "¡Copiado!", langLabel: "Idioma", guideTitle: "🚀 Guía", guideClose: "Empezar", guideSteps: "1. Modo Fácil: Escribe tus hallazgos.\n2. Contexto: Copia para mantener memoria en la IA." },
+    pt: { tokensSaved: "Tokens Salvos ~", tabEasy: "✏️ Modo Fácil", btnEasyAdd: "✚ Salvar", fbTitle: "Contato", copied: "Copiado!", langLabel: "Idioma", guideTitle: "🚀 Guia", guideClose: "Iniciar", guideSteps: "1. Modo Fácil: Escreva suas descobertas.\n2. Contexto: Copie para manter a memória na IA." },
+    de: { tokensSaved: "Gesparte Tokens ~", tabEasy: "✏️ Einfach", btnEasyAdd: "✚ Speichern", fbTitle: "Kontakt", copied: "Kopiert!", langLabel: "Sprache", guideTitle: "🚀 Anleitung", guideClose: "Starten", guideSteps: "1. Einfacher Modus: Erkenntnisse eintragen.\n2. Kontext: Kopieren, um AI-Erinnerung zu behalten." },
+    id: { tokensSaved: "Token Tersimpan ~", tabEasy: "✏️ Mudah", btnEasyAdd: "✚ Simpan", fbTitle: "Kontak", copied: "Tersalin!", langLabel: "Bahasa", guideTitle: "🚀 Panduan", guideClose: "Mulai", guideSteps: "1. Mode Mudah: Ketik temuan Anda.\n2. Konteks: Salin untuk menjaga memori AI." },
+    th: { tokensSaved: "ประหยัดโทเค็น ~", tabEasy: "✏️ โหมดง่าย", btnEasyAdd: "✚ บันทึก", fbTitle: "ติดต่อ", copied: "คัดลอกแล้ว!", langLabel: "ภาษา", guideTitle: "🚀 คู่มือ", guideClose: "เริ่มต้น", guideSteps: "1. โหมดง่าย: พิมพ์สิ่งที่คุณค้นพบ\n2. บริบท: คัดลอกเพื่อรักษาความจำ AI" },
+    vi: { tokensSaved: "Token Đã Lưu ~", tabEasy: "✏️ Dễ dàng", btnEasyAdd: "✚ Lưu", fbTitle: "Liên hệ", copied: "Đã chép!", langLabel: "Ngôn ngữ", guideTitle: "🚀 Hướng dẫn", guideClose: "Bắt đầu", guideSteps: "1. Chế độ dễ: Nhập phát hiện của bạn.\n2. Bối cảnh: Sao chép để duy trì bộ nhớ AI." }
+};
 
-        updateUI() {
-            const t = i18n[this.lang];
-            document.getElementById('ui-title').innerText = t.title;
-            document.getElementById('token-display').innerText = t.token + this.data.totalSaved + (this.lang === 'zh' ? '（估算）' : ' (est.)');
-            document.getElementById('btn-lang').innerText = t.lang;
-            document.getElementById('btn-theme').innerText = t.theme;
-            document.getElementById('btn-guide-start').innerText = t.guideStart;
-            document.getElementById('ui-helper-title').innerText = t.helperTitle;
-            document.getElementById('ui-helper-desc').innerText = t.helperDesc;
-            document.getElementById('btn-copy-prompt').innerText = t.copyPrompt;
-            document.getElementById('btn-copy-ctx').innerText = t.copyCtx;
-            document.getElementById('btn-add-claim').innerText = t.claim;
-            document.getElementById('btn-add-supersede').innerText = t.supersede;
-            document.getElementById('btn-add-anchor').innerText = t.anchor;
-            document.getElementById('ui-id-tip').innerText = t.idTip;
-            document.getElementById('console-input').placeholder = t.placeholder;
-            document.getElementById('btn-exec').innerText = t.exec;
-            document.getElementById('btn-smart').innerText = t.smart;
-            document.getElementById('ui-help-title').innerText = t.helpTitle;
-            document.getElementById('btn-help-close').innerText = t.helpClose;
-            document.getElementById('ui-help-content').innerHTML = t.helpText;
-            document.getElementById('ui-g1-t').innerText = t.g1t; document.getElementById('ui-g1-d').innerText = t.g1d;
-            document.getElementById('ui-g2-t').innerText = t.g2t; document.getElementById('ui-g2-d').innerText = t.g2d;
-            document.getElementById('ui-g3-t').innerText = t.g3t; document.getElementById('ui-g3-d').innerText = t.g3d;
-        }
+Object.keys(i18n).forEach(lang => {
+    if (lang === 'en') return;
+    Object.keys(i18n.en).forEach(key => {
+        if (!i18n[lang][key]) i18n[lang][key] = i18n.en[key];
+    });
+});
 
-        toggleHelp() { 
-            const m = document.getElementById('modal-overlay');
-            m.style.display = m.style.display === 'flex' ? 'none' : 'flex'; 
-        }
-        startGuide() { this.currentStep = 1; document.getElementById('guide-overlay').style.display = 'flex'; this.showStep(); }
-        nextStep() { this.currentStep++; this.currentStep > 3 ? document.getElementById('guide-overlay').style.display = 'none' : this.showStep(); }
-        showStep() {
-            document.querySelectorAll('.guide-step').forEach(s => s.style.display = 'none');
-            document.getElementById('step-' + this.currentStep).style.display = 'block';
-        }
+function getLogo(lang, isDark, isHC) {
+    const cartFill = isHC ? '#FFD700' : (isDark ? '#818CF8' : '#6366F1');
+    const cartStroke = isHC ? '#000000' : (isDark ? '#E2E8F0' : '#0F172A');
+    const codeLine = isHC ? '#000000' : '#0F172A';
+    const wheelFill = isHC ? '#FFD700' : (isDark ? '#E2E8F0' : '#0F172A');
+    const wheelStroke = isHC ? '#000000' : (isDark ? '#0F172A' : '#F8FAFC');
+    const textCode = isHC ? '#FFD700' : (isDark ? '#818CF8' : '#6366F1');
+    const textCart = isHC ? '#FFFFFF' : (isDark ? '#F8FAFC' : '#0F172A');
+    const textSika = isHC ? '#FFD700' : (isDark ? '#818CF8' : '#6366F1');
+    const showSika = (lang === 'zh-CN' || lang === 'zh-TW' || lang === 'ja');
+    const vbW = showSika ? '390' : '270';
 
-        copyAIPrompt() { navigator.clipboard.writeText(i18n[this.lang].prompt); alert(i18n[this.lang].copied); }
-        copyContext() {
-            const act = this.data.nodes.filter(n => !n.isSuperseded || n.type === 'anchor');
-            navigator.clipboard.writeText(`[CODECART CONTEXT]\n${act.map(n => `${n.type==='anchor'?'⚓':'+'} ${n.id}: ${n.content}`).join('\n')}`);
-            alert(i18n[this.lang].copied);
-        }
+    return `<svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 -10 ${vbW} 70">
+        <g class="cart-auto">
+            <path d="M 29 10 L 18 -2" stroke="${cartStroke}" stroke-width="6" stroke-linecap="round"/>
+            <path d="M 18 -2 L 46 -2" stroke="${cartStroke}" stroke-width="6" stroke-linecap="round"/>
+            <rect x="20" y="6" width="79" height="34" rx="6" fill="${cartFill}" stroke="${cartStroke}" stroke-width="6"/>
+            <rect x="29" y="14" width="57" height="4" rx="1" fill="${codeLine}"/>
+            <rect x="29" y="22" width="46" height="4" rx="1" fill="${codeLine}"/>
+            <rect x="29" y="30" width="53" height="4" rx="1" fill="${codeLine}"/>
+            <rect x="19" y="37" width="81" height="6" rx="2" fill="${cartStroke}"/>
+        </g>
+        <g class="wL">
+            <circle cx="36" cy="40" r="11" fill="${wheelFill}" stroke="${wheelStroke}" stroke-width="3"/>
+            <line x1="36" y1="29" x2="36" y2="51" stroke="${wheelStroke}" stroke-width="1.8" opacity="0.55"/>
+            <line x1="25" y1="40" x2="47" y2="40" stroke="${wheelStroke}" stroke-width="1.8" opacity="0.55"/>
+        </g>
+        <g class="wR">
+            <circle cx="83" cy="40" r="11" fill="${wheelFill}" stroke="${wheelStroke}" stroke-width="3"/>
+            <line x1="83" y1="29" x2="83" y2="51" stroke="${wheelStroke}" stroke-width="1.8" opacity="0.55"/>
+            <line x1="72" y1="40" x2="94" y2="40" stroke="${wheelStroke}" stroke-width="1.8" opacity="0.55"/>
+        </g>
+        <text x="108" y="40" font-family="system-ui" font-size="36" font-weight="700">
+            <tspan fill="${textCode}">Code</tspan><tspan fill="${textCart}">Cart</tspan>${showSika ? `<tspan fill="${textSika}" font-size="38" dy="1">思卡</tspan>` : ''}
+        </text>
+    </svg>`;
+}
 
-        insertCmd(t) { const i = document.getElementById('console-input'); i.value += (i.value ? '\n' : '') + t; i.focus(); }
-        
-        execute() {
-            const txt = document.getElementById('console-input').value;
-            const cP = /\+CLAIM\(([^,]+),\s*["'“]([^"'”]+)["'”]\)/gi;
-            const sP = />SUPERSEDE\(([^,]+),\s*([^,]+),\s*["'“]([^"'”]+)["'”]\)/gi;
-            const aP = /\+ANCHOR\(["'“]([^"'”]+)["'”]\)/gi;
-            let m, f = false;
-            while ((m = cP.exec(txt))) { this.addNode(m[1].trim(), m[2], 'claim'); f = true; }
-            while ((m = sP.exec(txt))) { this.supersede(m[1].trim()); f = true; }
-            while ((m = aP.exec(txt))) { this.addNode('ANC_'+Date.now().toString().slice(-4), m[1], 'anchor'); f = true; }
-            if (f) { this.data.totalSaved += Math.max(1, Math.round(txt.length * 0.3)); this.updateUI(); document.getElementById('console-input').value = ''; this.render(); }
-        }
-
-        addNode(id, content, type) { const n = { uid: Date.now()+Math.random(), id, content, type, isSuperseded: false }; this.data.nodes.push(n); return n; }
-        supersede(o) { const t = this.data.nodes.find(node => node.id.toLowerCase() === o.toLowerCase()); if (t) t.isSuperseded = true; }
-        deleteNode(uid) { if(confirm("Confirm Delete?")) { this.data.nodes = this.data.nodes.filter(n => n.uid !== uid); this.render(); } }
-
-        smartCollapse() {
-            const txt = document.getElementById('console-input').value; if (!txt) return;
-            const id = prompt(i18n[this.lang].alertId);
-            if (id) { this.addNode(id, txt.substring(0,400), 'claim'); this.data.totalSaved += Math.max(1, Math.round(txt.length * 0.3)); this.updateUI(); document.getElementById('console-input').value = ''; this.render(); }
-        }
-
-        render() {
-            const c = document.getElementById('canvas'); c.innerHTML = '';
-            this.data.nodes.forEach(n => {
-                const d = document.createElement('div');
-                d.className = `node ${n.type} ${n.isSuperseded ? 'superseded' : ''}`;
-                d.innerHTML = `<span class="del-btn" onclick="store.deleteNode(${n.uid})">×</span><span class="node-id">${n.id}</span><div class="node-content">${n.content}</div>`;
-                c.appendChild(d);
-            });
-        }
-        exportJSON() { const b = new Blob([JSON.stringify(this.data, null, 2)], {type: 'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `CodeCart_v1.1.8.json`; a.click(); }
+class CodeCartV132 {
+    constructor() {
+        this.lang = this._detectLanguage();
+        this.theme = 'dark-mode';
+        this.data = { nodes: [], totalSaved: 0 };
+        this.tab = 'easy';
+        this.init();
     }
-    const store = new CodeCartV118();
+
+    _detectLanguage() {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        let detected = (navigator.language || 'en').toLowerCase();
+        
+        if (detected.includes('zh-tw') || detected.includes('zh-hk')) detected = 'zh-TW';
+        else if (detected.includes('zh')) detected = 'zh-CN';
+        else detected = detected.split('-')[0];
+
+        if (tz.includes('Taipei') || tz.includes('Hong_Kong')) detected = 'zh-TW';
+        else if (tz.includes('Shanghai')) detected = 'zh-CN';
+        else if (tz.includes('Tokyo')) detected = 'ja';
+        else if (tz.includes('Bangkok')) detected = 'th';
+        else if (tz.includes('Jakarta')) detected = 'id';
+        else if (tz.includes('Ho_Chi_Minh')) detected = 'vi';
+
+        return i18n[detected] ? detected : 'en';
+    }
+
+    init() {
+        this._load();
+        document.body.className = this.theme;
+        this.updateUI();
+        this.render();
+    }
+
+    setLang(l) { this.lang = l; this.updateUI(); this._save(); }
+    toggleTheme() {
+        const idx = THEMES.indexOf(this.theme);
+        this.theme = THEMES[(idx + 1) % THEMES.length];
+        document.body.className = this.theme;
+        this.updateUI(); this._save();
+    }
+    switchTab(t) {
+        this.tab = t;
+        document.getElementById('tab-easy').className = 'tab-btn' + (t==='easy'?' active':'');
+        document.getElementById('tab-adv').className = 'tab-btn' + (t==='adv'?' active':'');
+        document.getElementById('easy-panel').style.display = t==='easy'?'flex':'none';
+        document.getElementById('adv-panel').style.display = t==='adv'?'flex':'none';
+    }
+
+    updateUI() {
+        const t = i18n[this.lang];
+        document.getElementById('logo-container').innerHTML = getLogo(this.lang, this.theme==='dark-mode', this.theme==='hc-mode');
+        document.getElementById('lang-select').value = this.lang;
+        document.getElementById('lbl-lang').innerText = t.langLabel;
+        document.getElementById('token-display').innerText = t.tokensSaved + this.data.totalSaved;
+        document.getElementById('btn-theme').innerText = THEME_ICONS[this.theme];
+        
+        document.getElementById('btn-theme').setAttribute('data-tip', t.ttTheme);
+        document.getElementById('btn-share').setAttribute('data-tip', t.ttShare);
+        document.getElementById('btn-guide').setAttribute('data-tip', t.ttGuide);
+        document.getElementById('btn-help').setAttribute('data-tip', t.ttHelp);
+        document.getElementById('btn-fb').setAttribute('data-tip', t.ttFb);
+
+        document.getElementById('ui-helper-title').innerText = t.helperTitle;
+        document.getElementById('ui-helper-desc').innerText = t.helperDesc;
+        document.getElementById('btn-copy-prompt').innerText = t.copyPrompt;
+        document.getElementById('btn-copy-prompt').setAttribute('data-tip', t.ttPrompt);
+        document.getElementById('ui-svc-title').innerText = t.svcTitle;
+        document.getElementById('ui-svc-desc').innerText = t.svcDesc;
+        document.getElementById('btn-svc').innerText = t.svcBtn;
+        document.getElementById('btn-copy-ctx').innerText = t.copyCtx;
+        document.getElementById('btn-copy-ctx').setAttribute('data-tip', t.ttCtx);
+
+        document.getElementById('tab-easy').innerText = t.tabEasy;
+        document.getElementById('tab-adv').innerText = t.tabAdv;
+        document.getElementById('easy-lbl-content').innerText = t.easyLblContent;
+        document.getElementById('easy-lbl-id').innerText = t.easyLblId;
+        document.getElementById('easy-lbl-type').innerText = t.easyLblType;
+        document.getElementById('opt-claim').innerText = t.optClaim;
+        document.getElementById('opt-anchor').innerText = t.optAnchor;
+        document.getElementById('btn-easy-add').innerText = t.btnEasyAdd;
+
+        document.getElementById('btn-add-claim').innerText = t.claim;
+        document.getElementById('btn-add-supersede').innerText = t.supersede;
+        document.getElementById('btn-add-anchor').innerText = t.anchor;
+        document.getElementById('btn-exec').innerText = t.exec;
+        document.getElementById('btn-smart').innerText = t.smart;
+
+        document.getElementById('help-title').innerText = t.helpTitle;
+        document.getElementById('help-content').innerHTML = "<b>+CLAIM(id, '...')</b> - Record info<br><b>>SUPERSEDE(old, new, '...')</b> - Evolution<br><b>+ANCHOR('...')</b> - Rule";
+        document.getElementById('btn-help-close').innerText = t.helpClose;
+
+        document.getElementById('guide-title').innerText = t.guideTitle;
+        document.getElementById('guide-content').innerText = t.guideSteps;
+        document.getElementById('btn-guide-close').innerText = t.guideClose;
+
+        document.getElementById('fb-title').innerText = t.fbTitle;
+        document.getElementById('fb-wa-desc').innerText = t.fbWaDesc;
+        document.getElementById('btn-wa-open').innerText = t.waOpen;
+        document.getElementById('fb-lbl-email').innerText = t.fbLblEmail;
+        document.getElementById('fb-lbl-msg').innerText = t.fbLblMsg;
+        document.getElementById('btn-fb-send').innerText = t.fbSend;
+        document.getElementById('btn-fb-close').innerText = t.fbClose;
+    }
+
+    startGuide() {
+        document.getElementById('guide-overlay').style.display = 'flex';
+    }
+
+    easyAdd() {
+        const content = document.getElementById('easy-input-content').value.trim();
+        if (!content) return;
+        const type = document.getElementById('easy-input-type').value;
+        const id = document.getElementById('easy-input-id').value.trim() || ((type==='claim'?'rec_':'anc_')+Date.now().toString().slice(-4));
+        this.data.nodes.push({ uid: Date.now(), id, content, type, isSuperseded: false });
+        this.data.totalSaved += Math.round(content.length * 0.4);
+        document.getElementById('easy-input-content').value = '';
+        this.updateUI(); this.render(); this._save();
+    }
+
+    execute() {
+        const txt = document.getElementById('console-input').value;
+        if (!txt) return;
+        let changed = false;
+        
+        for (const m of txt.matchAll(/\+CLAIM\(([^,]+),\s*['"]([^'"]+)['"]\)/gi)) {
+            this.data.nodes.push({ uid: Date.now()+Math.random(), id: m[1].trim(), content: m[2], type: 'claim', isSuperseded: false });
+            changed = true;
+        }
+        for (const m of txt.matchAll(/\+ANCHOR\(['"]([^'"]+)['"]\)/gi)) {
+            this.data.nodes.push({ uid: Date.now()+Math.random(), id: 'anc_'+Date.now().toString().slice(-4), content: m[1], type: 'anchor', isSuperseded: false });
+            changed = true;
+        }
+        for (const m of txt.matchAll(/>SUPERSEDE\(([^,]+),\s*([^,]+),\s*['"]([^'"]+)['"]\)/gi)) {
+            const oldId = m[1].trim();
+            const oldNode = this.data.nodes.find(n => n.id === oldId && !n.isSuperseded);
+            if(oldNode) oldNode.isSuperseded = true;
+            this.data.nodes.push({ uid: Date.now()+Math.random(), id: m[2].trim(), content: m[3], type: 'claim', isSuperseded: false });
+            changed = true;
+        }
+
+        if (changed) {
+            document.getElementById('console-input').value = '';
+            this.updateUI(); this.render(); this._save();
+        }
+    }
+
+    smartCollapse() {
+        if(confirm(i18n[this.lang].confirmDel)) {
+            this.data.nodes = this.data.nodes.filter(n => !n.isSuperseded);
+            this.render(); this._save();
+        }
+    }
+
+    exportJSON() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.data, null, 2));
+        const a = document.createElement('a');
+        a.href = dataStr;
+        a.download = "codecart_export.json";
+        a.click();
+    }
+
+    render() {
+        const c = document.getElementById('canvas'); c.innerHTML = '';
+        const idx = document.getElementById('entity-index'); idx.innerHTML = '';
+        this.data.nodes.forEach(n => {
+            const d = document.createElement('div');
+            d.className = `node ${n.type} ${n.isSuperseded ? 'superseded' : ''}`;
+            d.innerHTML = `<span class="del-btn" onclick="store.del(${n.uid})">×</span><span class="node-id">${n.id}</span><div class="node-content">${n.content}</div>`;
+            c.appendChild(d);
+            if(!n.isSuperseded) {
+                const i = document.createElement('div'); i.style.fontSize='11px'; i.style.padding='4px'; i.innerText = (n.type==='anchor'?'⚓':'•')+' '+n.id;
+                idx.appendChild(i);
+            }
+        });
+    }
+
+    del(uid) { if(confirm(i18n[this.lang].confirmDel)) { this.data.nodes = this.data.nodes.filter(n=>n.uid!==uid); this.render(); this._save(); } }
+    
+    toggleHelp() { 
+        const o = document.getElementById('modal-overlay'); 
+        o.style.display = o.style.display==='flex'?'none':'flex'; 
+    }
+    
+    toggleFeedback() { 
+        const o = document.getElementById('feedback-overlay'); 
+        o.style.display = o.style.display === 'flex' ? 'none' : 'flex'; 
+    }
+
+    openWA() { window.open('https://wa.me/640204842024', '_blank'); }
+    sendFeedback() { window.location.href = `mailto:lexxu@codecart.tech?subject=Feedback&body=${encodeURIComponent(document.getElementById('fb-msg').value)}`; this.toggleFeedback(); }
+    insertCmd(c) { const i = document.getElementById('console-input'); i.value += (i.value?'\n':'')+c; i.focus(); }
+    copyAIPrompt() { navigator.clipboard.writeText("Act as my research assistant. After analysis, summarize into CodeCart DSL: +CLAIM(id, 'content')."); this._showToast(i18n[this.lang].copied); }
+    copyContext() { 
+        const ctx = this.data.nodes.filter(n=>!n.isSuperseded).map(n=>`${n.id}: ${n.content}`).join('\n');
+        navigator.clipboard.writeText("[CONTEXT]\n"+ctx); this._showToast(i18n[this.lang].copied); 
+    }
+    shareURL() {
+        const hash = btoa(unescape(encodeURIComponent(JSON.stringify(this.data))));
+        const url = location.origin + location.pathname + '#cc=' + hash;
+        navigator.clipboard.writeText(url); this._showToast(i18n[this.lang].shareOk);
+    }
+    _showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2000); }
+    _save() { localStorage.setItem('cc_v13', JSON.stringify(this.data)); localStorage.setItem('cc_theme', this.theme); }
+    _load() {
+        const d = localStorage.getItem('cc_v13'); if(d) this.data = JSON.parse(d);
+        const t = localStorage.getItem('cc_theme'); if(t) this.theme = t;
+        if(location.hash.startsWith('#cc=')) { try { this.data = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(4))))); } catch(e){} }
+    }
+}
+const store = new CodeCartV132();
 </script>
 </body>
 </html>
