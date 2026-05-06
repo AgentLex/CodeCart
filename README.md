@@ -47,3 +47,4 @@ CodeCart is a portable, single-file cognitive cartridge for long AI work session
 
 - **Feedback**: Contact via WhatsApp QR in-app or email `lexxu@codecart.tech`
 - **Support**: Support development on [Ko-fi](https://ko-fi.com/lexxu).
+- **Crypto (ETH/ENS)**: `0xF729Db34e9733d74c992a27AA812cFF5363C82e0`
