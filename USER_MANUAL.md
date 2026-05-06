@@ -1,6 +1,6 @@
 # CodeCart User Manual
 
-[简体中文](USER_MANUAL.zh-CN.md) | **English**
+**English** | [简体中文](USER_MANUAL.zh-CN.md) | [繁體中文](USER_MANUAL.zh-TW.md) | [日本語](USER_MANUAL.ja.md)
 
 ## What CodeCart is
 
@@ -15,7 +15,7 @@ Designed for quick, manual inputs without learning any syntax.
 - Click `✚ Save` to instantly add it to your canvas.
 
 ### 2. Advanced Mode (For Power Users & AI)
-Designed for bulk operations and direct AI integration using the CodeCart DSL (Domain Specific Language).
+Designed for bulk operations and direct AI integration using the CodeCart DSL.
 - Paste AI-generated instructions.
 - Execute complex logic tree updates.
 - Export/Import JSON data.
@@ -23,38 +23,13 @@ Designed for bulk operations and direct AI integration using the CodeCart DSL (D
 ## The Fastest Workflow
 
 1. Open the CodeCart portable HTML file in any browser.
-2. In **Easy Mode**, add one hard rule as an `Anchor` (e.g., project boundaries or non-negotiable requirements).
-3. Click `COPY PROMPT` (in the sidebar) and paste it into your AI chat to set the output format.
-4. Chat with the AI normally.
-5. When the AI outputs a summary, switch to **Advanced Mode**, paste the generated DSL into the console, and click `⚡ EXECUTE`.
-6. Use `🧠 COLLAPSE` if you pasted raw chat text and want CodeCart to compress it into a node.
-7. Click `📋 SYNC CONTEXT` to copy all active nodes before switching to a different AI model or starting a new chat session.
+2. In **Easy Mode**, add one hard rule as an `Anchor`.
+3. Click `COPY PROMPT` and paste it into your AI chat to set the format.
+4. Chat normally, then paste the AI's DSL output into **Advanced Mode** and click `⚡ EXECUTE`.
+5. Click `📋 SYNC CONTEXT` to copy active nodes before starting a new session.
 
-## Core DSL Actions (Advanced Mode)
+## Core DSL Actions
 
-### 1. `+ANCHOR('...')`
-Use this for laws, boundaries, and constraints that should not drift.
-*Example:*
-`+ANCHOR('Must remain single-file and offline-capable')`
-
-### 2. `+CLAIM(id, '...')`
-Use this for current working conclusions.
-*Example:*
-`+CLAIM(ui_01, 'First-time users need an easy onboarding mode')`
-
-### 3. `>SUPERSEDE(old, new, 'why')`
-Use this when a newer decision replaces an older one. The old node will be greyed out.
-*Example:*
-`>SUPERSEDE(ui_01, ui_02, 'Easy mode works better than forcing users to learn DSL manually')`
-
-## Suggested Best Practices
-
-- **Keep anchors short and stable.**
-- **Keep claims atomic:** One node equals one important idea.
-- **Replace, don't edit:** Use `>SUPERSEDE` to replace outdated claims instead of editing history mentally. This preserves the evolution of your logic.
-- **Sync frequently:** Use `SYNC CONTEXT` to bridge memory between desktop, mobile, or different LLMs.
-- **Export saves:** Download the JSON file from Advanced Mode after reaching important milestones.
-
-## A Simple Mental Model
-
-Raw AI chat is your noisy, chaotic notebook. CodeCart is your distilled, crystallized operating memory.
+- `+ANCHOR('...')`: For non-negotiable project boundaries.
+- `+CLAIM(id, '...')`: For current working conclusions.
+- `>SUPERSEDE(old, new, 'why')`: To evolve old logic with newer decisions.
