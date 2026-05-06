@@ -1,6 +1,6 @@
 # 🗂️ CodeCart: The Cognitive Memory Cartridge For AI (v1.3)
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md)
 
 **Stop AI Memory Pollution. Crystallize Logic. Save Tokens.**
 
